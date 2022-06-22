@@ -1,25 +1,23 @@
-# Dynamic-language-change-example
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 
-Перевод c динамической сменой языка:
 
-1) В tr.pro вставим строчку TRANSLATIONS += tr_ru.ts
-2) Запустим хотя бы раз приложение
-3) Инструменты -> Внешние -> Linguist -> Обновить
-   Появляется файл tr_ru.ts
-4) Открываем файл tr_ru.ts в Linguist и переводим тексты
-5) Компилируем в tr_ru.qm
-6) Далее помещаем tr_ru.ts в папку bin, а tr_ru.qm в папку bin/lan
-7) Создаём файл ресурсов в папке bin
-8) Добавляем в ресурс файл tr_ru.qm, с префиксом / без псевдонима
-9) В файле MainWindow.cpp пишем код (#include <QTranslator> не забываем):
-    
-	MainWindow::MainWindow(QWidget *parent)
+
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
     ui->comboBox->addItems(QStringList() << "ru_RU" << "en_US");
+
+    /*
+     * Поключаем к сигналу изменения пункта комбобокса лямбда-функцию, в которой будет
+     * изменяться перевод приложения.
+     * Поскольку QComboBox имеет перегрузку сигнатуры сигнала, то нам необходимо
+     * скастовать сигнал к нужной сигнатуре. В данном случае будем использовать
+     * название пункта при его изменении.
+     */
 
     connect(ui->comboBox, static_cast<void(QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
             [=](const QString &str)
@@ -34,6 +32,11 @@
 
 }
 
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
 void MainWindow::changeEvent(QEvent *event)
 {
     //В случае получения события о смене языка
@@ -42,3 +45,11 @@ void MainWindow::changeEvent(QEvent *event)
         ui->retranslateUi(this);//переведём окно заново
     }
 }
+
+
+void MainWindow::on_btnOpen_clicked()
+{
+    Widget *w = new Widget();
+    w->show();
+}
+
